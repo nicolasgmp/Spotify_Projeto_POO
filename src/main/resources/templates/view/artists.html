@@ -11,70 +11,100 @@
       crossorigin="anonymous"
     />
     <style>
+      .artist-image {
+        width: 160px;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 8px;
+        transition: transform 0.2s;
+      }
+
+      .artist-image:hover {
+        transform: scale(1.05); /* Efeito de zoom ao passar o mouse */
+      }
+
+      .genres-list,
+      .albums-list {
+        list-style-type: none;
+        padding-left: 0;
+      }
+
       .table {
         margin: 0 auto;
         width: 90%;
+        border-collapse: collapse; /* Remove o espaçamento entre células */
       }
 
-      .btn-excluir,
-      .btn-editar {
-        font-size: 0.9rem;
-        color: white;
-        border: 0;
-        border-radius: 15%;
-        padding: 2px 15px;
+      th {
+        padding: 10px; /* Ajuste o valor conforme desejado */
+        text-align: center; /* Centraliza o texto, se desejado */
+        background-color: #f8f9fa; /* Cor de fundo dos cabeçalhos */
       }
 
-      .btn-editar {
-        background-color: cornflowerblue;
+      td {
+        vertical-align: middle; /* Alinha verticalmente o conteúdo */
       }
 
-      .btn-excluir {
-        background-color: red;
+      tbody tr:hover {
+        background-color: #f1f1f1; /* Cor de fundo ao passar o mouse */
       }
 
-      .btn-excluir:hover,
-      .btn-editar:hover {
-        background-color: gray;
+      .spotify-link {
+        color: #1db954; /* Cor do Spotify */
+        text-decoration: none; /* Remove o sublinhado */
+        font-weight: bold; /* Negrito para destacar */
+        transition: color 0.3s; /* Transição suave para a cor */
       }
 
-      .alert {
-        width: 80%;
-        margin: 1rem auto 1rem;
+      .spotify-link:hover {
+        color: #1ed760; /* Cor mais clara ao passar o mouse */
+        text-decoration: underline; /* Sublinha ao passar o mouse */
+      }
+
+      .spotify-icon {
+        width: 20px; /* Tamanho do ícone */
+        height: 20px; /* Tamanho do ícone */
+        margin-right: 5px; /* Espaçamento entre o ícone e o texto */
+        vertical-align: middle; /* Alinha o ícone ao texto */
       }
     </style>
   </head>
 
   <body>
     <div class="p-3">
-      <div class="h1 text-center">Artistas</div>
-      <table class="table table-hover">
-        <thead>
-          <th scope="col">Nome</th>
-          <th scope="col">Popularidade</th>
-          <th scope="col">Gêneros</th>
-          <th scope="col">Álbuns</th>
+      <h1 class="text-center mb-4">Lista de Artistas</h1>
+      <table class="table table-hover table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">Imagem</th>
+            <th scope="col">Seguidores</th>
+            <th scope="col">Gêneros</th>
+            <th scope="col">Álbuns</th>
+          </tr>
         </thead>
         <tbody>
           <tr th:each="artist : ${artists}">
-            <td class="col-2" th:text="${artist.name}"></td>
-            <td class="col-1" th:text="${artista.followers.total}"></td>
-            <td class="col-2" th:text="${#strings.arrayJoin(artist.genres, ', ')}"></td>
-            <td class="col-3">
-              <!-- <ul>
-                <li th:each="album : ${artist.albums}">
-                  <span th:text="${album.name}">Nome do Álbum</span> -
-                  <span th:text="${album.release_date}">Data</span>
-                  <a th:href="${album.external_urls.spotify}" target="_blank">(Spotify)</a>
-                </li>
-              </ul> -->
+            <td class="text-center">
+              <a th:href="${artist.artistUrl}" th:text="${artist.name}" class="spotify-link"></a>
+            </td>
+            <td class="text-center">
+              <img th:src="${artist.imgUrl}" alt="Imagem do artista ${artist.name}" class="img-fluid artist-image" />
+            </td>
+            <td th:text="${artist.followers}" class="text-center"></td>
+            <td>
+              <ul class="genres-list">
+                <li th:each="genre : ${artist.genres}" th:text="${genre.toUpperCase()}" class="mb-1"></li>
+              </ul>
+            </td>
+            <td>
+              <ul class="albums-list">
+                <!-- Aqui você pode incluir a lógica para exibir álbuns, se necessário -->
+              </ul>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-
-    <div class="alert alert-success text-center" role="alert" th:text="${success}" th:if="${success}"></div>
-    <div class="alert alert-danger text-center" role="alert" th:text="${failure}" th:if="${failure}"></div>
   </body>
 </html>

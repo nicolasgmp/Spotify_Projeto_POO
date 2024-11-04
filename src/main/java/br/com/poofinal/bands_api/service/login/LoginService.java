@@ -13,10 +13,10 @@ public class LoginService {
     @Autowired
     private LoginClient loginClient;
 
-    @Value("${spotify.clientId}")
+    @Value("${spotify.client.id}")
     private String clientId;
 
-    @Value("${spotify.clientSecret}")
+    @Value("${spotify.client.secret}")
     private String clientSecret;
 
     public String loginSpotify() {

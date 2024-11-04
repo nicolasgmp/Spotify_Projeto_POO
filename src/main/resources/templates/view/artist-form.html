@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Artista</title>
+  </head>
+  <body>
+    <h1>Informe o ID do Artista</h1>
+    <form action="#" th:action="@{/api/v1/artists/new}" method="post">
+      <label for="artistId">ID do Artista:</label>
+      <input type="text" id="artistId" name="id" required />
+      <button type="submit">Enviar</button>
+    </form>
+  </body>
+</html>

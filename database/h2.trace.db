@@ -1,0 +1,3 @@
+2024-11-04 11:11:33.202911-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "TB_ARTISTS" not found (this database is empty); SQL statement:
+select a1_0.id,a1_0.followers,a1_0.genres,a1_0.name,a1_0.url_img,a1_0.url_spotify from tb_artists a1_0 where a1_0.name=? [42104-224]

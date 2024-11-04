@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record ArtistSpotify(String name, Follower followers, List<String> genres, List<ArtistImages> images,
+public record ArtistSpotify(String id, String name, Follower followers, List<String> genres, List<ArtistImages> images,
         ExternalUrl externalUrls) {
 
     public record Follower(int total) {

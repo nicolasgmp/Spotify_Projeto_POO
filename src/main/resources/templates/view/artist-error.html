@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Erro</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+      .error-container {
+        text-align: center;
+        max-width: 500px;
+      }
+      h1 {
+        font-size: 2em;
+        color: #e74c3c;
+      }
+      p {
+        font-size: 1.2em;
+      }
+      .back-link {
+        margin-top: 20px;
+        display: inline-block;
+        text-decoration: none;
+        color: #3498db;
+        font-weight: bold;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="error-container">
+      <h1>Opa! Aconteceu um erro</h1>
+      <p th:text="${errorMessage}">Erro inesperado, tente novamente mais tarde.</p>
+      <a th:href="@{/api/v1/artists/new}" class="back-link">Voltar para a página inicial</a>
+    </div>
+  </body>
+</html>
