@@ -3,6 +3,7 @@ package br.com.poofinal.bands_api.service.artist;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +45,18 @@ public class ArtistService {
     public ArtistDTO createArtist(String id) {
         String token = loginService.loginSpotify();
         ArtistSpotify artistSpotify = artistClient.getArtistById("Bearer " + token, id);
-        ArtistAlbumSpotify albumsSpotify = artistClient.getArtistAlbum("Bearer " + token, 50, 0, id);
+        List<AlbumSpotify> allAlbums = new ArrayList<>();
+
+        int limit = 10;
+        int offset = 0;
+        while(true) {
+            ArtistAlbumSpotify artistAlbumSpotify = artistClient.getArtistAlbum("Bearer " + token, limit, offset, id);
+            allAlbums.addAll(artistAlbumSpotify.items());
+
+            if(artistAlbumSpotify.items().size() < limit) break;
+
+            offset++;
+        }
         var artistDB = artistRepository.findArtistByNameIgnoreCase(artistSpotify.name());
 
         if (artistDB.isPresent()) {
@@ -56,7 +68,7 @@ public class ArtistService {
                 List.of());
         artistRepository.save(newArtist);
 
-        for (AlbumSpotify albumSpotify : albumsSpotify.items()) {
+        for (AlbumSpotify albumSpotify : allAlbums) {
             this.saveArtistAlbums(id, albumSpotify);
         }
 
