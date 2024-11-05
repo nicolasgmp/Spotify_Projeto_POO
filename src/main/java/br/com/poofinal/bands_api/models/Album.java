@@ -1,10 +1,11 @@
 package br.com.poofinal.bands_api.models;
 
-import java.util.List;
+import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -13,20 +14,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tb_artists")
-@Setter
+@Table(name = "tb_albums")
 @Getter
-@NoArgsConstructor
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class Artist {
+public class Album {
+
     @Id
     private String id;
     private String name;
-    private int followers;
-    private String urlSpotify;
-    private String urlImg;
-    private List<String> genres;
-    @OneToMany(mappedBy = "artist")
-    private List<Album> albums;
+    private String releaseDate;
+    private String imgUrl;
+    private String spotifyUrl;
+    @ManyToOne
+    @JoinColumn(name = "artist_id")
+    private Artist artist;
+    
 }

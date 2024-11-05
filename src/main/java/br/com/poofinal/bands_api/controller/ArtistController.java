@@ -18,9 +18,9 @@ public class ArtistController {
     private ArtistService artistService;
 
     @GetMapping("/artist")
-    public ModelAndView getArtist(@RequestParam String id) {
+    public ModelAndView getOneArtist(@RequestParam String name) {
         ModelAndView mv = new ModelAndView("view/artist-view");
-        var artist = artistService.findArtistSpotify(id);
+        var artist = artistService.findArtistByName(name);
         mv.addObject("artist", artist);
         return mv;
     }
@@ -42,6 +42,6 @@ public class ArtistController {
     public ModelAndView saveArtist(@RequestParam String id) {
         System.out.println(id);
         artistService.createArtist(id); 
-        return new ModelAndView("redirect:/api/v1/artists/artist?id=" + id);
+        return new ModelAndView("redirect:/api/v1/artists");
     }
 }
