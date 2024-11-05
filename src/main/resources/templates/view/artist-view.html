@@ -11,49 +11,87 @@
       crossorigin="anonymous"
     />
     <style>
-      .table-container {
-        margin: 0 auto;
-        max-width: 800px;
+      .artist-image {
+        width: 160px;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 8px;
+        transition: transform 0.2s;
       }
-      .table thead th {
-        text-align: center;
+
+      .artist-image:hover {
+        transform: scale(1.05);
       }
+
       .genres-list,
       .albums-list {
         list-style-type: none;
         padding-left: 0;
       }
+
+      .table {
+        margin: 0 auto;
+        width: 90%;
+        border-collapse: collapse;
+      }
+
+      th {
+        padding: 10px;
+        text-align: center;
+        background-color: #f8f9fa;
+      }
+
+      td {
+        vertical-align: middle;
+      }
+
+      tbody tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      .spotify-link {
+        color: #1db954;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s;
+      }
+
+      .spotify-link:hover {
+        color: #1ed760;
+        text-decoration: underline;
+      }
+
+      .image-column {
+        width: 20%;
+      }
+
+      .genres-column {
+        width: 25%;
+      }
     </style>
   </head>
 
   <body>
-    <div class="container p-5">
-      <div class="text-center mb-4">
-        <h1 th:text="${artist.name}">Nome do Artista</h1>
-      </div>
-      <div class="table-container">
-        <table class="table table-bordered table-striped">
+    <div class="p-3">
+      <h1 class="text-center mb-4">Detalhes do Artista</h1>
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered">
           <thead class="table-light">
             <tr>
-              <th scope="col"></th>
-              <th scope="col">Link Spotify</th>
+              <th scope="col">Nome</th>
+              <th scope="col" class="image-column">Imagem</th>
               <th scope="col">Seguidores</th>
-              <th scope="col">Gêneros</th>
+              <th scope="col" class="genres-column">Gêneros</th>
               <th scope="col">Álbuns</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>
-                <img
-                  th:src="${artist.imgUrl}"
-                  alt="Imagem do artista ' + ${artist.name}"
-                  style="width: 160px; height: 160px; object-fit: cover"
-                  class="img-fluid rounded"
-                />
+              <td class="text-center">
+                <a th:href="${artist.artistUrl}" th:text="${artist.name}" class="spotify-link"></a>
               </td>
               <td class="text-center">
-                <a th:href="${artist.artistUrl}" th:text="${artist.name}"></a>
+                <img th:src="${artist.imgUrl}" alt="Imagem do artista ${artist.name}" class="img-fluid artist-image" />
               </td>
               <td th:text="${artist.followers}" class="text-center"></td>
               <td>
@@ -61,23 +99,22 @@
                   <li th:each="genre : ${artist.genres}" th:text="${genre.toUpperCase()}" class="mb-1"></li>
                 </ul>
               </td>
-
-              <!-- Coluna de Álbuns
-                        <td>
-                            <ul class="albums-list">
-                                <li th:each="album : ${artist.albums}">
-                                    <span th:text="${album.name}">Nome do Álbum</span> - 
-                                    <span th:text="${album.release_date}">Data</span>
-                                </li>
-                            </ul>
-                        </td> -->
+              <td>
+                <ul class="albums-list text-center">
+                  <li th:each="album, iterStat : ${artist.albums}">
+                    <a
+                      th:if="${iterStat.index < 10}"
+                      th:href="${album.spotifyUrl}"
+                      th:text="${album.name.toUpperCase()}"
+                      class="spotify-link"
+                    ></a>
+                  </li>
+                </ul>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
-
-      <div class="alert alert-success text-center" role="alert" th:text="${success}" th:if="${success}"></div>
-      <div class="alert alert-danger text-center" role="alert" th:text="${failure}" th:if="${failure}"></div>
     </div>
   </body>
 </html>
