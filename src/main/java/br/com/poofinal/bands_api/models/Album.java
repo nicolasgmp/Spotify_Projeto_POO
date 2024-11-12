@@ -1,6 +1,6 @@
 package br.com.poofinal.bands_api.models;
 
-import java.time.LocalDate;
+import java.io.Serializable;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -20,16 +20,21 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class Album {
+public class Album implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     private String id;
+
     private String name;
+
     private String releaseDate;
+
     private String imgUrl;
+
     private String spotifyUrl;
+
     @ManyToOne
     @JoinColumn(name = "artist_id")
     private Artist artist;
-    
 }

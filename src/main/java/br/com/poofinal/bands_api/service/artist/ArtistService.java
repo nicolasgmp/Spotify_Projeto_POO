@@ -2,7 +2,6 @@ package br.com.poofinal.bands_api.service.artist;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +25,7 @@ import br.com.poofinal.bands_api.repository.ArtistRepository;
 import br.com.poofinal.bands_api.service.login.LoginService;
 
 @Service
-public class ArtistService {
+public class ArtistService implements IArtistService {
 
     @Autowired
     private ArtistClient artistClient;
@@ -57,7 +56,7 @@ public class ArtistService {
         artistRepository.save(newArtist);
 
         for (AlbumSpotify albumSpotify : albumsSpotify.items()) {
-            this.saveArtistAlbums(id, albumSpotify);
+            this.saveArtistAlbum(id, albumSpotify);
         }
 
         return new ArtistDTO(newArtist.getName(), newArtist.getFollowers(), newArtist.getGenres(),
@@ -65,7 +64,7 @@ public class ArtistService {
     }
 
     @Transactional
-    public AlbumDTO saveArtistAlbums(String id, AlbumSpotify album) {
+    public AlbumDTO saveArtistAlbum(String id, AlbumSpotify album) {
         Artist artist = this.findById(id);
         if (artist == null) {
             this.createArtist(id);
@@ -95,7 +94,7 @@ public class ArtistService {
 
     public ArtistDTO findArtistByName(String name) {
         var artist = artistRepository.findArtistByNameIgnoreCase(name);
-        if  (artist.isEmpty()) {
+        if (artist.isEmpty()) {
             throw new ArtistNotFoundException("Artista não cadastrados no DB");
         }
 
