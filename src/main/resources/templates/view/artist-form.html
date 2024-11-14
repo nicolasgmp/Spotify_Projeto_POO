@@ -6,10 +6,13 @@
     <title>Cadastro de Artista</title>
   </head>
   <body>
-    <h1>Informe o ID do Artista</h1>
+    <form th:action="@{/api/v1/users/logout}" method="post" style="display: inline">
+      <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+    <h1>Informe o nome do Artista</h1>
     <form action="#" th:action="@{/api/v1/artists/new}" method="post">
-      <label for="artistId">ID do Artista:</label>
-      <input type="text" id="artistId" name="id" required />
+      <label for="artistId">Nome do Artista:</label>
+      <input type="text" id="artistName" name="name" required />
       <button type="submit">Enviar</button>
     </form>
   </body>

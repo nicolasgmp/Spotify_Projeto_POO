@@ -17,15 +17,15 @@ public class ArtistController {
     @Autowired
     private ArtistService artistService;
 
-    @GetMapping("/artist")
-    public ModelAndView getOneArtist(@RequestParam String name) {
-        ModelAndView mv = new ModelAndView("view/artist-view");
-        var artist = artistService.findArtistByName(name);
-        mv.addObject("artist", artist);
+    @GetMapping("/favorites")
+    public ModelAndView getUserFavArtists() {
+        ModelAndView mv = new ModelAndView("view/artists");
+        var artists = artistService.findUserArtists();
+        mv.addObject("artists", artists);
         return mv;
     }
 
-    @GetMapping()
+    @GetMapping("/all")
     public ModelAndView getAll() {
         ModelAndView mv = new ModelAndView("view/artists");
         var artists = artistService.findAllArtists();
@@ -39,9 +39,8 @@ public class ArtistController {
     }
 
     @PostMapping("/new")
-    public ModelAndView saveArtist(@RequestParam String id) {
-        System.out.println(id);
-        artistService.createArtist(id); 
-        return new ModelAndView("redirect:/api/v1/artists");
+    public ModelAndView saveArtist(@RequestParam String name) {
+        artistService.createArtist(name); 
+        return new ModelAndView("redirect:/api/v1/artists/favorites");
     }
 }

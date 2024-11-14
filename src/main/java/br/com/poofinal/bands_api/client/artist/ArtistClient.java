@@ -8,19 +8,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import br.com.poofinal.bands_api.client.artist.dto.ArtistAlbumSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistSpotify;
+import br.com.poofinal.bands_api.client.artist.dto.SearchArtistName;
 
-@FeignClient(name = "ArtistClient", url = "https://api.spotify.com/v1/artists")
+@FeignClient(name = "ArtistClient", url = "https://api.spotify.com/v1")
 public interface ArtistClient {
 
-    @GetMapping("/{id}")
-    ArtistSpotify getArtistById(
-            @RequestHeader("Authorization") String auth,
-            @PathVariable String id);
+        @GetMapping("/artists/{id}")
+        ArtistSpotify getArtistById(
+                        @RequestHeader("Authorization") String auth,
+                        @PathVariable String id);
 
-    @GetMapping("/{id}/albums")
-    ArtistAlbumSpotify getArtistAlbum(
-            @RequestHeader("Authorization") String auth,
-            @RequestParam("limit") int limit,
-            @RequestParam("offset") int offset,
-            @PathVariable String id);
+        @GetMapping("/artists/{id}/albums")
+        ArtistAlbumSpotify getArtistAlbum(
+                        @RequestHeader("Authorization") String auth,
+                        @RequestParam("limit") int limit,
+                        @RequestParam("offset") int offset,
+                        @PathVariable String id);
+
+        @GetMapping("/search")
+        SearchArtistName getArtistByName(
+                        @RequestHeader("Authorization") String auth,
+                        @RequestParam("query") String artistName,
+                        @RequestParam("type") String type);
 }

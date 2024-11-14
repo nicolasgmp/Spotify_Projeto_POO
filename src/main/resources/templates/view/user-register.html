@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Cadastro de usuário</title>
+  </head>
+  <body>
+    <h2>Cadastro de usuário</h2>
+    <form th:action="@{/api/v1/users/register}" method="post">
+      <label>Nome: <input type="text" name="name" /></label>
+      <br />
+      <label>Nome de usuário: <input type="text" name="username" /></label>
+      <br />
+      <label>Senha: <input type="password" name="password" /></label>
+      <br />
+      <button type="submit">Cadastrar</button>
+    </form>
+  </body>
+</html>
