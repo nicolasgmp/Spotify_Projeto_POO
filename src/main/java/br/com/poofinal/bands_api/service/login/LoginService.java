@@ -8,7 +8,7 @@ import br.com.poofinal.bands_api.client.login.LoginClient;
 import br.com.poofinal.bands_api.client.login.LoginRequest;
 
 @Service
-public class LoginService {
+public class LoginService implements ILoginService {
 
     @Autowired
     private LoginClient loginClient;

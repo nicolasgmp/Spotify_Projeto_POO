@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,16 +20,18 @@ import br.com.poofinal.bands_api.client.artist.dto.AlbumSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistAlbumSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistDTO;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistSpotify;
-import br.com.poofinal.bands_api.exception.artist.ArtistAlreadyExistsException;
+import br.com.poofinal.bands_api.client.artist.dto.SearchArtistName;
 import br.com.poofinal.bands_api.exception.artist.ArtistNotFoundException;
 import br.com.poofinal.bands_api.models.Album;
 import br.com.poofinal.bands_api.models.Artist;
+import br.com.poofinal.bands_api.models.enums.UserRole;
 import br.com.poofinal.bands_api.repository.AlbumRepository;
 import br.com.poofinal.bands_api.repository.ArtistRepository;
+import br.com.poofinal.bands_api.repository.UserRepository;
 import br.com.poofinal.bands_api.service.login.LoginService;
 
 @Service
-public class ArtistService {
+public class ArtistService implements IArtistService {
 
     @Autowired
     private ArtistClient artistClient;
@@ -41,26 +45,31 @@ public class ArtistService {
     @Autowired
     private AlbumRepository albumRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Transactional
-    public ArtistDTO createArtist(String id) {
+    public ArtistDTO createArtist(String artistName) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        var user = userRepository.findByUsername(auth.getName()).get();
         String token = loginService.loginSpotify();
-        ArtistSpotify artistSpotify = artistClient.getArtistById("Bearer " + token, id);
-        List<AlbumSpotify> allAlbums = new ArrayList<>();
+        SearchArtistName res = artistClient.getArtistByName("Bearer " + token, "artist:" + artistName, "artist");
 
-        int limit = 10;
-        int offset = 0;
-        while(true) {
-            ArtistAlbumSpotify artistAlbumSpotify = artistClient.getArtistAlbum("Bearer " + token, limit, offset, id);
-            allAlbums.addAll(artistAlbumSpotify.items());
-
-            if(artistAlbumSpotify.items().size() < limit) break;
-
-            offset++;
+        if (res.artists().items().isEmpty()) {
+            throw new ArtistNotFoundException("Artista não encontrado");
         }
+
+        ArtistSpotify artistSpotify = res.artists().items().get(0);
+
+        ArtistAlbumSpotify albumsSpotify = artistClient.getArtistAlbum("Bearer " + token, 50, 0, artistSpotify.id());
+
         var artistDB = artistRepository.findArtistByNameIgnoreCase(artistSpotify.name());
 
         if (artistDB.isPresent()) {
-            throw new ArtistAlreadyExistsException("Artista já existente");
+            user.getArtists().add(artistDB.get());
+            userRepository.save(user);
+            return new ArtistDTO(artistDB.get().getName(), artistDB.get().getFollowers(), artistDB.get().getGenres(),
+                    artistDB.get().getUrlImg(), artistDB.get().getUrlSpotify(), artistDB.get().getAlbums());
         }
 
         Artist newArtist = new Artist(artistSpotify.id(), artistSpotify.name(), artistSpotify.followers().total(),
@@ -68,16 +77,19 @@ public class ArtistService {
                 List.of());
         artistRepository.save(newArtist);
 
-        for (AlbumSpotify albumSpotify : allAlbums) {
-            this.saveArtistAlbums(id, albumSpotify);
+        for (AlbumSpotify albumSpotify : albumsSpotify.items()) {
+            this.saveArtistAlbum(newArtist.getId(), albumSpotify);
         }
+
+        user.getArtists().add(newArtist);
+        userRepository.save(user);
 
         return new ArtistDTO(newArtist.getName(), newArtist.getFollowers(), newArtist.getGenres(),
                 newArtist.getUrlImg(), newArtist.getUrlSpotify(), newArtist.getAlbums());
     }
 
     @Transactional
-    public AlbumDTO saveArtistAlbums(String id, AlbumSpotify album) {
+    public AlbumDTO saveArtistAlbum(String id, AlbumSpotify album) {
         Artist artist = this.findById(id);
         if (artist == null) {
             this.createArtist(id);
@@ -107,7 +119,7 @@ public class ArtistService {
 
     public ArtistDTO findArtistByName(String name) {
         var artist = artistRepository.findArtistByNameIgnoreCase(name);
-        if  (artist.isEmpty()) {
+        if (artist.isEmpty()) {
             throw new ArtistNotFoundException("Artista não cadastrados no DB");
         }
 
@@ -120,6 +132,12 @@ public class ArtistService {
     }
 
     public List<ArtistDTO> findAllArtists() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        var user = userRepository.findByUsername(auth.getName());
+        if (user.get().getRole() != UserRole.ADMIN) {
+            throw new ArtistNotFoundException("Acesso negado");
+        }
+
         List<Artist> artists = artistRepository.findAll();
         if (artists.isEmpty()) {
             throw new ArtistNotFoundException("Não existem artistas cadastrados no DB");
@@ -134,6 +152,25 @@ public class ArtistService {
                 })
                 .collect(Collectors.toList());
 
+        return artistsDTO;
+    }
+
+    public List<ArtistDTO> findUserArtists() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        var user = userRepository.findByUsername(auth.getName());
+
+        if (user.get().getArtists().isEmpty()) {
+            throw new ArtistNotFoundException("Você ainda não favoritou artistas");
+        }
+
+        var artistsDTO = user.get().getArtists().stream()
+                .map(a -> {
+                    this.sortAlbumsByReleaseDate(a);
+                    return new ArtistDTO(a.getName(), a.getFollowers(),
+                            a.getGenres(), a.getUrlImg(), a.getUrlSpotify(),
+                            a.getAlbums());
+                })
+                .collect(Collectors.toList());
         return artistsDTO;
     }
 
