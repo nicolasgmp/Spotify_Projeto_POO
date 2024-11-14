@@ -28,14 +28,14 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .authorizeHttpRequests(authz -> authz
-                        // .requestMatchers(HttpMethod.GET, "/api/v1/artists/all").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/artists/all").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/h2-console").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/artists/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/artists/new").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/artists/new").permitAll()
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
