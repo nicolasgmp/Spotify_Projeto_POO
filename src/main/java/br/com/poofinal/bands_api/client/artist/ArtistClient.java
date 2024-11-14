@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import br.com.poofinal.bands_api.client.artist.dto.ArtistAlbumSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistSpotify;
+import org.springframework.web.bind.annotation.RequestParam;
 import br.com.poofinal.bands_api.client.artist.dto.SearchArtistName;
 
 @FeignClient(name = "ArtistClient", url = "https://api.spotify.com/v1")
