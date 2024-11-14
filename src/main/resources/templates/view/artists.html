@@ -82,6 +82,9 @@
       <form th:action="@{/api/v1/users/logout}" method="post" style="display: inline">
         <button type="submit" class="btn btn-danger">Logout</button>
       </form>
+      <form th:action="@{/api/v1/artists/new}" method="get" style="display: inline">
+        <button type="submit" class="btn btn-danger">Novo Artista</button>
+      </form>
     <div class="p-3">
       <h1 class="text-center mb-4">Lista de Artistas</h1>
       <div class="table-responsive">

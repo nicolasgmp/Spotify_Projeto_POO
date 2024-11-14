@@ -12,7 +12,6 @@ public interface IArtistService {
     ArtistDTO createArtist(String id);
     AlbumDTO saveArtistAlbum(String id, AlbumSpotify album);
     ArtistDTO addNewAlbum(String id, Album album);
-    ArtistDTO findArtistByName(String name);
     List<ArtistDTO> findAllArtists();
     Artist findById(String id);
 }
