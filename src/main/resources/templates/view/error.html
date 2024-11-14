@@ -42,7 +42,7 @@
     <div class="error-container">
       <h1>Opa! Aconteceu um erro</h1>
       <p th:text="${errorMessage}">Erro inesperado, tente novamente mais tarde.</p>
-      <a th:href="@{/api/v1/artists/new}" class="back-link">Voltar para a página inicial</a>
+      <a th:href="@{${redirectUrl}}" class="back-link">Voltar</a>
     </div>
   </body>
 </html>

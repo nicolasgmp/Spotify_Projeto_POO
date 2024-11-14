@@ -12,7 +12,10 @@
       <input type="text" id="username" name="username" required />
       <label for="password">Senha:</label>
       <input type="text" id="password" name="password" required />
-      <button type="submit">Enviar</button>
+      <button type="submit">Logar</button>
+    </form>
+    <form th:action="@{/api/v1/users/register}" method="get" style="display: inline">
+      <button type="submit" class="btn btn-info">Cadastre-se</button>
     </form>
   </body>
 </html>

@@ -2,8 +2,6 @@ package br.com.poofinal.bands_api.service.artist;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +20,8 @@ import br.com.poofinal.bands_api.client.artist.dto.ArtistDTO;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.SearchArtistName;
 import br.com.poofinal.bands_api.exception.artist.ArtistNotFoundException;
+import br.com.poofinal.bands_api.exception.user.AccessDeniedException;
+import br.com.poofinal.bands_api.exception.user.UserNotFoundException;
 import br.com.poofinal.bands_api.models.Album;
 import br.com.poofinal.bands_api.models.Artist;
 import br.com.poofinal.bands_api.models.enums.UserRole;
@@ -51,7 +51,8 @@ public class ArtistService implements IArtistService {
     @Transactional
     public ArtistDTO createArtist(String artistName) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        var user = userRepository.findByUsername(auth.getName()).get();
+        var user = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
         String token = loginService.loginSpotify();
         SearchArtistName res = artistClient.getArtistByName("Bearer " + token, "artist:" + artistName, "artist");
 
@@ -117,25 +118,12 @@ public class ArtistService implements IArtistService {
                 artist.getUrlSpotify(), artist.getAlbums());
     }
 
-    public ArtistDTO findArtistByName(String name) {
-        var artist = artistRepository.findArtistByNameIgnoreCase(name);
-        if (artist.isEmpty()) {
-            throw new ArtistNotFoundException("Artista não cadastrados no DB");
-        }
-
-        var db = artist.get();
-        List<Album> sortedAlbums = this.sortAlbumsByReleaseDate(db);
-        var dto = new ArtistDTO(db.getName(), db.getFollowers(), db.getGenres(), db.getUrlImg(), db.getUrlSpotify(),
-                sortedAlbums);
-
-        return dto;
-    }
-
     public List<ArtistDTO> findAllArtists() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        var user = userRepository.findByUsername(auth.getName());
-        if (user.get().getRole() != UserRole.ADMIN) {
-            throw new ArtistNotFoundException("Acesso negado");
+        var user = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new AccessDeniedException("Acesso negado");
         }
 
         List<Artist> artists = artistRepository.findAll();
@@ -157,13 +145,14 @@ public class ArtistService implements IArtistService {
 
     public List<ArtistDTO> findUserArtists() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        var user = userRepository.findByUsername(auth.getName());
+        var user = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
 
-        if (user.get().getArtists().isEmpty()) {
+        if (user.getArtists().isEmpty()) {
             throw new ArtistNotFoundException("Você ainda não favoritou artistas");
         }
 
-        var artistsDTO = user.get().getArtists().stream()
+        var artistsDTO = user.getArtists().stream()
                 .map(a -> {
                     this.sortAlbumsByReleaseDate(a);
                     return new ArtistDTO(a.getName(), a.getFollowers(),

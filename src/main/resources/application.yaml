@@ -17,12 +17,12 @@ spring:
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
-
+    mode: HTML
+    encoding: UTF-8
+    cache: false
 spotify:
   client:
     id: 3e47dde041644fc3a49f07ddce7c1732
     secret: 47ae8346fb814b9a87a57fd0b145ca5b
-    redirectUri: http://localhost:8080
-
 jwt:
   secret: 358aaa4d470f681859d0486d56234fc1e1e9fa9b3fb74fbb2e4d5e765e51f0ecbadae71c87676cc16f41115dda7c82924b2c2ffe2c48997d4d5173b20e1a561a
