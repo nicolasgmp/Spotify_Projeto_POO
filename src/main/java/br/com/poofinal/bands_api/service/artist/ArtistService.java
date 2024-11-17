@@ -48,9 +48,13 @@ public class ArtistService implements IArtistService {
     @Autowired
     private UserRepository userRepository;
 
+    @Caching(evict = {
+            @CacheEvict(value = "artists", allEntries = true),
+            @CacheEvict(value = "user_artists", key = "#auth.name")
+    })
     @Transactional
-    public ArtistDTO createArtist(String artistName) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+    public ArtistDTO createArtist(String artistName, Authentication auth) {
         var user = userRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
         String token = loginService.loginSpotify();
@@ -79,7 +83,7 @@ public class ArtistService implements IArtistService {
         artistRepository.save(newArtist);
 
         for (AlbumSpotify albumSpotify : albumsSpotify.items()) {
-            this.saveArtistAlbum(newArtist.getId(), albumSpotify);
+            this.saveArtistAlbum(newArtist.getName(), albumSpotify, auth);
         }
 
         user.getArtists().add(newArtist);
@@ -118,8 +122,8 @@ public class ArtistService implements IArtistService {
                 artist.getUrlSpotify(), artist.getAlbums());
     }
 
-    public List<ArtistDTO> findAllArtists() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    @Cacheable("artists")
+    public List<ArtistDTO> findAllArtists(Authentication auth) {
         var user = userRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
         if (user.getRole() != UserRole.ADMIN) {
@@ -143,8 +147,8 @@ public class ArtistService implements IArtistService {
         return artistsDTO;
     }
 
-    public List<ArtistDTO> findUserArtists() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    @Cacheable("user_artists")
+    public List<ArtistDTO> findUserArtists(Authentication auth) {
         var user = userRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
 
