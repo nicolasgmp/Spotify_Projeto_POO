@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import br.com.poofinal.bands_api.exception.user.AccessDeniedException;
 import br.com.poofinal.bands_api.exception.user.UnauthorizedException;
+import br.com.poofinal.bands_api.exception.user.UserLoginException;
+import br.com.poofinal.bands_api.exception.user.UserRegisterException;
 import br.com.poofinal.bands_api.models.User;
 import br.com.poofinal.bands_api.models.enums.UserRole;
 import br.com.poofinal.bands_api.repository.UserRepository;
@@ -37,12 +39,15 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@RequestParam String username, @RequestParam String password, HttpServletRequest req) {
         var user = this.repository.findByUsername(username);
+        if (user.isEmpty()) {
+            throw new UserLoginException("Usuário ou senha inválidos");
+        }
         if (encoder.matches(password, user.get().getPassword())) {
             String token = this.service.generateToken(user.get());
             req.getSession().setAttribute("token", token);
             return "redirect:/api/v1/artists/new";
         }
-        return "redirect:/api/v1/users/login";
+        throw new UserLoginException("Usuário ou senha inválidos");
     }
 
     @GetMapping("/register")
@@ -55,7 +60,7 @@ public class AuthController {
             @RequestParam String password) {
         var user = this.repository.findByUsername(username);
         if (user.isPresent()) {
-            throw new RuntimeException("username already exists");
+            throw new UserRegisterException("Usuário já cadastrado");
         }
         var newUser = new User();
         newUser.setUsername(username);
@@ -76,7 +81,8 @@ public class AuthController {
 
     @GetMapping("/error/accessDenied")
     public String accessDenied(Model model) {
-        throw new AccessDeniedException("Acesso negado. Seu nível de acesso não permite que este recurso seja acessado");
+        throw new AccessDeniedException(
+                "Acesso negado. Seu nível de acesso não permite que este recurso seja acessado");
     }
 
     @GetMapping("/error/unauthorized")

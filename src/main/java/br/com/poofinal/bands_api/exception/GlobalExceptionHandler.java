@@ -8,7 +8,9 @@ import br.com.poofinal.bands_api.exception.artist.ArtistAlreadyExistsException;
 import br.com.poofinal.bands_api.exception.artist.ArtistNotFoundException;
 import br.com.poofinal.bands_api.exception.user.AccessDeniedException;
 import br.com.poofinal.bands_api.exception.user.UnauthorizedException;
+import br.com.poofinal.bands_api.exception.user.UserLoginException;
 import br.com.poofinal.bands_api.exception.user.UserNotFoundException;
+import br.com.poofinal.bands_api.exception.user.UserRegisterException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -43,6 +45,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public String handleUserNotFoundException(UserNotFoundException ex, Model model) {
+        model.addAttribute("errorMessage", ex.getMessage());
+        model.addAttribute("redirectUrl", "/api/v1/users/register");
+        return "view/error";
+    }
+
+    @ExceptionHandler(UserLoginException.class)
+    public String handleUserLoginException(UserLoginException ex, Model model) {
+        model.addAttribute("errorMessage", ex.getMessage());
+        model.addAttribute("redirectUrl", "/api/v1/users/login");
+        return "view/error";
+    }
+
+    @ExceptionHandler(UserRegisterException.class)
+    public String handleUserRegisterException(UserRegisterException ex, Model model) {
         model.addAttribute("errorMessage", ex.getMessage());
         model.addAttribute("redirectUrl", "/api/v1/users/register");
         return "view/error";
