@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Artista</title>
+  </head>
+  <body>
+    <form th:action="@{/api/v1/users/logout}" method="post" style="display: inline">
+      <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+    <form th:action="@{/api/v1/artists/favorites}" method="get" style="display: inline">
+      <button type="submit" class="btn btn-danger">Meus Artistas</button>
+    </form>
+    <form th:action="@{/api/v1/artists/all}" method="get" style="display: inline">
+      <button type="submit" class="btn btn-danger">Todos os Artistas</button>
+    </form>
+    <h1>Informe o nome do Artista</h1>
+    <form action="#" th:action="@{/api/v1/artists/name}" method="post">
+      <label for="artistId">Nome do Artista:</label>
+      <input type="text" id="artistName" name="name" required />
+      <button type="submit">Enviar</button>
+    </form>
+  </body>
+</html>

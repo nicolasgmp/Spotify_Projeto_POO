@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,7 +29,6 @@ import br.com.poofinal.bands_api.mapper.AlbumMapper;
 import br.com.poofinal.bands_api.mapper.ArtistMapper;
 import br.com.poofinal.bands_api.models.Album;
 import br.com.poofinal.bands_api.models.Artist;
-import br.com.poofinal.bands_api.models.User;
 import br.com.poofinal.bands_api.models.enums.UserRole;
 import br.com.poofinal.bands_api.repository.AlbumRepository;
 import br.com.poofinal.bands_api.repository.ArtistRepository;
@@ -155,9 +157,22 @@ public class ArtistService implements IArtistService {
         return artistsDTO;
     }
 
-    public Artist findById(String id) {
-        return artistRepository.findById(id)
-                .orElseThrow(() -> new ArtistNotFoundException("Artista não encontrado"));
+    public ArtistDTO findArtistByName(String name) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+
+        var artistDB = artistRepository.findArtistByNameIgnoreCase(name);
+        if (artistDB.isPresent()) {
+            return ArtistMapper.fromArtistToDTO(artistDB.get());
+        }
+
+        String token = loginService.loginSpotify();
+        SearchArtistName res = artistClient.getArtistByName("Bearer " + token, name, "artist");
+        ArtistSpotify artist = res.artists().items().get(0);
+        List<AlbumSpotify> resAlbums = artistClient.getArtistAlbum("Bearer " + token, 50, 0, artist.id()).items();
+
+        return ArtistMapper.fromSpotifyToDTO(artist, resAlbums);
     }
 
     private List<Album> sortAlbumsByReleaseDate(Artist artist) {
