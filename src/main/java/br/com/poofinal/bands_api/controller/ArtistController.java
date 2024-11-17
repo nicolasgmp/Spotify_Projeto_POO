@@ -1,6 +1,8 @@
 package br.com.poofinal.bands_api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,14 +21,16 @@ public class ArtistController {
 
     @GetMapping("/favorites")
     public String getUserFavArtists(Model model) {
-        var artists = artistService.findUserArtists();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        var artists = artistService.findUserArtists(auth);
         model.addAttribute("artists", artists);
         return "view/artists";
     }
 
     @GetMapping("/all")
     public String getAll(Model model) {
-        var artists = artistService.findAllArtists();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        var artists = artistService.findAllArtists(auth);
         model.addAttribute("artists", artists);
         return "view/artists";
     }
@@ -38,7 +42,8 @@ public class ArtistController {
 
     @PostMapping("/new")
     public String saveArtist(@RequestParam String name) {
-        artistService.createArtist(name);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        artistService.createArtist(name, auth);
         return "redirect:/api/v1/artists/favorites";
     }
 }

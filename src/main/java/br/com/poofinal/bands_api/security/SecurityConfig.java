@@ -33,10 +33,9 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)) 
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .authorizeHttpRequests(authz -> authz
-                        // .requestMatchers(HttpMethod.GET, "/h2-console").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/h2-console/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/artists/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/error/unauthorized").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/login").permitAll()
