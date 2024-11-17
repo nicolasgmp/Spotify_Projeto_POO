@@ -22,8 +22,11 @@ import br.com.poofinal.bands_api.client.artist.dto.SearchArtistName;
 import br.com.poofinal.bands_api.exception.artist.ArtistNotFoundException;
 import br.com.poofinal.bands_api.exception.user.AccessDeniedException;
 import br.com.poofinal.bands_api.exception.user.UserNotFoundException;
+import br.com.poofinal.bands_api.mapper.AlbumMapper;
+import br.com.poofinal.bands_api.mapper.ArtistMapper;
 import br.com.poofinal.bands_api.models.Album;
 import br.com.poofinal.bands_api.models.Artist;
+import br.com.poofinal.bands_api.models.User;
 import br.com.poofinal.bands_api.models.enums.UserRole;
 import br.com.poofinal.bands_api.repository.AlbumRepository;
 import br.com.poofinal.bands_api.repository.ArtistRepository;
@@ -73,13 +76,10 @@ public class ArtistService implements IArtistService {
         if (artistDB.isPresent()) {
             user.getArtists().add(artistDB.get());
             userRepository.save(user);
-            return new ArtistDTO(artistDB.get().getName(), artistDB.get().getFollowers(), artistDB.get().getGenres(),
-                    artistDB.get().getUrlImg(), artistDB.get().getUrlSpotify(), artistDB.get().getAlbums());
+            return ArtistMapper.fromArtistToDTO(artistDB.get());
         }
 
-        Artist newArtist = new Artist(artistSpotify.id(), artistSpotify.name(), artistSpotify.followers().total(),
-                artistSpotify.externalUrls().spotify(), artistSpotify.images().get(0).url(), artistSpotify.genres(),
-                List.of());
+        Artist newArtist = ArtistMapper.fromSpotifyToArtist(artistSpotify);
         artistRepository.save(newArtist);
 
         for (AlbumSpotify albumSpotify : albumsSpotify.items()) {
@@ -89,37 +89,30 @@ public class ArtistService implements IArtistService {
         user.getArtists().add(newArtist);
         userRepository.save(user);
 
-        return new ArtistDTO(newArtist.getName(), newArtist.getFollowers(), newArtist.getGenres(),
-                newArtist.getUrlImg(), newArtist.getUrlSpotify(), newArtist.getAlbums());
+        return ArtistMapper.fromArtistToDTO(newArtist);
     }
 
     @Transactional
-    public AlbumDTO saveArtistAlbum(String id, AlbumSpotify album) {
-        Artist artist = this.findById(id);
-        if (artist == null) {
-            this.createArtist(id);
-        }
-
-        var newAlbum = new Album(album.id(), album.name(), album.releaseDate(), album.images().get(0).url(),
-                album.externalUrls().spotify(), artist);
+    public AlbumDTO saveArtistAlbum(String name, AlbumSpotify album, Authentication auth) {
+        Artist artist = artistRepository.findArtistByNameIgnoreCase(name)
+                .orElseThrow(() -> new ArtistNotFoundException("Não foi encontrado um artista com este nome"));
+        Album newAlbum = AlbumMapper.fromSpotifyToAlbum(album, artist);
         albumRepository.save(newAlbum);
-        this.addNewAlbum(id, newAlbum);
+        this.addNewAlbum(name, newAlbum);
 
-        return new AlbumDTO(newAlbum.getName(), newAlbum.getReleaseDate().toString(), newAlbum.getImgUrl(),
-                newAlbum.getSpotifyUrl(), newAlbum.getArtist());
+        return AlbumMapper.fromAlbumToDTO(newAlbum);
     }
 
     @Transactional
-    public ArtistDTO addNewAlbum(String id, Album album) {
-        Artist artist = artistRepository.findById(id)
-                .orElseThrow(() -> new ArtistNotFoundException("Artista não encontrado"));
+    public ArtistDTO addNewAlbum(String name, Album album) {
+        Artist artist = artistRepository.findArtistByNameIgnoreCase(name)
+                .orElseThrow(() -> new ArtistNotFoundException("Não foi encontrado um artista com este nome"));
         artist.getAlbums().add(album);
         artistRepository.save(artist);
 
         artist.getAlbums().sort(Comparator.comparing(Album::getReleaseDate));
 
-        return new ArtistDTO(artist.getName(), artist.getFollowers(), artist.getGenres(), artist.getUrlImg(),
-                artist.getUrlSpotify(), artist.getAlbums());
+        return ArtistMapper.fromArtistToDTO(artist);
     }
 
     @Cacheable("artists")
@@ -138,12 +131,9 @@ public class ArtistService implements IArtistService {
         var artistsDTO = artists.stream()
                 .map(a -> {
                     this.sortAlbumsByReleaseDate(a);
-                    return new ArtistDTO(a.getName(), a.getFollowers(),
-                            a.getGenres(), a.getUrlImg(), a.getUrlSpotify(),
-                            a.getAlbums());
+                    return ArtistMapper.fromArtistToDTO(a);
                 })
                 .collect(Collectors.toList());
-
         return artistsDTO;
     }
 
@@ -159,9 +149,7 @@ public class ArtistService implements IArtistService {
         var artistsDTO = user.getArtists().stream()
                 .map(a -> {
                     this.sortAlbumsByReleaseDate(a);
-                    return new ArtistDTO(a.getName(), a.getFollowers(),
-                            a.getGenres(), a.getUrlImg(), a.getUrlSpotify(),
-                            a.getAlbums());
+                    return ArtistMapper.fromArtistToDTO(a);
                 })
                 .collect(Collectors.toList());
         return artistsDTO;
@@ -191,5 +179,4 @@ public class ArtistService implements IArtistService {
             return LocalDate.parse(releaseDateStr, formatter2);
         }
     }
-
 }
