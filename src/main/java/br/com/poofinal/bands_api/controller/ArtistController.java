@@ -1,5 +1,7 @@
 package br.com.poofinal.bands_api.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,5 +47,17 @@ public class ArtistController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         artistService.createArtist(name, auth);
         return "redirect:/api/v1/artists/favorites";
+    }
+
+    @GetMapping("/name")
+    public String getArtistByNameForm() {
+        return "view/artist-get-name-form";
+    }
+
+    @PostMapping("/name")
+    public String getArtistByName(@RequestParam String name, Model model) {
+        var artist = artistService.findArtistByName(name);
+        model.addAttribute("artists", List.of(artist));
+        return "view/artists";
     }
 }
