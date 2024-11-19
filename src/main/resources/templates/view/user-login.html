@@ -1,21 +1,29 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
-  </head>
-  <body>
-    <h1>Informe seus dados</h1>
-    <form action="#" th:action="@{/api/v1/users/login}" method="post">
-      <label for="username">Nome de usuário:</label>
-      <input type="text" id="username" name="username" required />
-      <label for="password">Senha:</label>
-      <input type="text" id="password" name="password" required />
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/styles/every.css}">
+  <link rel="stylesheet" th:href="@{/styles/login.css}">
+  <title>Login</title>
+</head>
+<body>
+<div class="container">
+  <div class="img-container">
+    <img th:src="@{/images/background-login-image.png}" alt="">
+  </div>
+  <div class="container-form">
+    <img th:src="@{/images/spotify-logo-preto.png}" alt="Logo">
+    <form class="input-group" th:action="@{/api/v1/users/login}" method="post">
+      <input type="text" name="username" id="username" placeholder="Usuário" required>
+      <input type="password" id="password" name="password" placeholder="Senha" required>
       <button type="submit">Logar</button>
     </form>
-    <form th:action="@{/api/v1/users/register}" method="get" style="display: inline">
-      <button type="submit" class="btn btn-info">Cadastre-se</button>
+    <form th:action="@{/api/v1/users/register}" method="get">
+      <button href="#" class="cadastro">Cadastre-se</button>
     </form>
-  </body>
+  </div>
+</div>
+</body>
 </html>

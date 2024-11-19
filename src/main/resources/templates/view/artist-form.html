@@ -1,25 +1,30 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cadastro de Artista</title>
-  </head>
-  <body>
-    <form th:action="@{/api/v1/users/logout}" method="post" style="display: inline">
-      <button type="submit" class="btn btn-danger">Logout</button>
-    </form>
-    <form th:action="@{/api/v1/artists/favorites}" method="get" style="display: inline">
-      <button type="submit" class="btn btn-danger">Meus Artistas</button>
-    </form>
-    <form th:action="@{/api/v1/artists/all}" method="get" style="display: inline">
-      <button type="submit" class="btn btn-danger">Todos os Artistas</button>
-    </form>
-    <h1>Informe o nome do Artista</h1>
-    <form action="#" th:action="@{/api/v1/artists/new}" method="post">
-      <label for="artistId">Nome do Artista:</label>
-      <input type="text" id="artistName" name="name" required />
-      <button type="submit">Enviar</button>
-    </form>
-  </body>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search-Screen</title>
+  <link rel="stylesheet" href="../../static/styles/every.css">
+  <link rel="stylesheet" href="../../static/styles/search-screen.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<header>
+  <a href="https://open.spotify.com/intl-pt" target="_blank">
+    <img src="../../static/images/logo-spotify.png" alt="Logo" height="50px" >
+  </a>
+</header>
+<div class="container">
+  <div class="text">
+    <h2>O melhor local de <b>Pesquisas</b> de seus artistas e bandas favoritos!</h2>
+    <p>Um site totalmente projetado por desenvolvedores em formação.</p>
+  </div>
+  <form class="input-group" th:action="@{/api/v1/artists/new}" method="post">
+    <div class="icon">
+      <button type="submit"> <i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+    <input type="text" id="pesquisa" name="name" required placeholder="Digite o nome do artista">
+  </form>
+</div>
+</body>
 </html>

@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/styles/**", "/images/**", "/js/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/h2-console/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/artists/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/error/unauthorized").permitAll()

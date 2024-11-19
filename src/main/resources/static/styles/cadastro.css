@@ -1,0 +1,93 @@
+
+
+.container{
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    margin-top: 240px;
+}
+b{
+    color: #1ed760;
+}
+.img-container{
+    height: 500px;
+    width: 510px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    border-radius: 10px 0 0 10px;
+}
+
+.img-container img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px 0 0 10px;
+}
+
+
+.container-form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    border-left: none;
+    padding: 20px;
+    height: 500px;
+    width: 500px;
+    border-radius: 0 10px 10px 0 ;
+}
+
+.container-form img{
+    width: 150px;
+    object-fit: cover;
+    margin-bottom: 40px;
+}
+
+.input-group{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 20px;
+
+}
+
+.input-group input{
+    width: 300px;
+    height: 35px;
+    border-radius: 24px;
+    border: 1.5px solid #ccc;
+    padding: 8px;
+    padding-left: 12px;
+
+}
+
+input:focus{
+    outline: none;
+}
+
+.input-group button{
+    width: 300px;
+    height: 35px;
+    border-radius: 24px;
+    background-color: #fff;
+    color: #1ed760;
+    font-weight: bold;
+    border: 1px solid #1ed760;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: 0.5s;
+}
+
+button:hover{
+    background-color: #1ed760;
+    color: #fff;
+    transition: 0.5s;
+}
+
+
+.cadastro{
+    color:#000;
+}

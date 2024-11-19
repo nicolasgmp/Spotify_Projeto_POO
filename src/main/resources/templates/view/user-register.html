@@ -1,21 +1,30 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+  <!DOCTYPE html>
+  <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
   <head>
-    <title>Cadastro de usuário</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/styles/every.css}">
+    <link rel="stylesheet" th:href="@{/styles/cadastro.css}">
+    <title>Cadastro</title>
   </head>
   <body>
-    <h2>Cadastro de usuário</h2>
-    <form th:action="@{/api/v1/users/register}" method="post">
-      <label>Nome: <input type="text" name="name" /></label>
-      <br />
-      <label>Nome de usuário: <input type="text" name="username" /></label>
-      <br />
-      <label>Senha: <input type="password" name="password" /></label>
-      <br />
-      <button type="submit">Cadastrar</button>
-    </form>
-    <form th:action="@{/api/v1/users/login}" method="get" style="display: inline">
-      <button type="submit" class="btn btn-info">Logar</button>
-    </form>
+  <div class="container">
+    <div class="img-container">
+      <img th:src="@{/images/background-cadastro-image.png}" alt="">
+    </div>
+    <div class="container-form">
+      <h2><b>Cadastro</b> de Usuário</h2>
+      <form class="input-group" th:action="@{/api/v1/users/register}" method="post">
+        <input type="text" name="name" id="name" placeholder="Nome" required>
+        <input type="text" name="username" id="user" placeholder="Nome do usuário" required>
+        <input type="password" id="password" name="password" placeholder="Senha" required>
+        <button type="submit">Cadastrar</button>
+      </form>
+      <form th:action="@{/api/v1/users/login}" method="get">
+        <button class="cadastro">Logar</button>
+      </form>
+    </div>
+  </div>
   </body>
-</html>
+  </html>
