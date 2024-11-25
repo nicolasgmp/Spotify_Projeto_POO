@@ -85,7 +85,7 @@ public class ArtistService implements IArtistService {
         validateAdminAccess(auth);
 
         return artistRepository.findAll().stream()
-                .peek(artist -> artist.setAlbums(fetchAlbumsSortedByPopularity(artist)))
+                .peek(artist -> artist.setAlbums(findAlbumsSortedByPopularity(artist)))
                 .map(ArtistMapper::fromArtistToDTO)
                 .collect(Collectors.toList());
     }
@@ -98,9 +98,14 @@ public class ArtistService implements IArtistService {
         }
 
         return user.getArtists().stream()
-                .peek(artist -> artist.setAlbums(fetchAlbumsSortedByPopularity(artist)))
+                .peek(artist -> artist.setAlbums(findAlbumsSortedByPopularity(artist)))
                 .map(ArtistMapper::fromArtistToDTO)
                 .collect(Collectors.toList());
+    }
+
+    public Artist findArtistByName(String name) {
+        return artistRepository.findArtistByNameIgnoreCase(name)
+                .orElseThrow(() -> new ArtistNotFoundException("Artista não encontrado: " + name));
     }
 
     private void saveArtistAlbums(Artist artist, String token) {
@@ -111,11 +116,6 @@ public class ArtistService implements IArtistService {
             Album album = createOrUpdateAlbum(artist, albumSpotify);
             addAlbumToArtist(artist, album);
         });
-    }
-
-    private Artist findArtistByName(String name) {
-        return artistRepository.findArtistByNameIgnoreCase(name)
-                .orElseThrow(() -> new ArtistNotFoundException("Artista não encontrado: " + name));
     }
 
     private Artist saveNewArtist(ArtistSpotify artistSpotify) {
@@ -175,7 +175,7 @@ public class ArtistService implements IArtistService {
         return res.artists().items().get(0);
     }
 
-    private List<Album> fetchAlbumsSortedByPopularity(Artist artist) {
+    private List<Album> findAlbumsSortedByPopularity(Artist artist) {
         return albumRepository.findByArtistOrderByPopularityDesc(artist);
     }
 
