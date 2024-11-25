@@ -35,6 +35,18 @@
     <div th:each="artist : ${artists}" class="container">
       <div class="image">
         <img th:src="${artist.imgUrl}" alt="Imagem do artista ${artist.name}" class="artist-image" />
+
+        <form
+          th:action="@{/api/v1/artists/remove}"
+          method="post"
+          style="display: inline"
+          th:if="${requestURI != '/api/v1/artists/all'}"
+        >
+          <input type="hidden" th:name="artistName" th:value="${artist.name}" />
+          <button type="submit" class="favorite-btn">
+            <i class="fa-solid fa-star"></i>
+          </button>
+        </form>
       </div>
       <div class="info-artista-container">
         <div class="info-artista">
