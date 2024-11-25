@@ -16,7 +16,7 @@ public class UnauthorizedHandler implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
-        response.sendRedirect("/api/v1/users/error/unauthorized");
+        response.sendRedirect("/api/v1/users/login");
     }
 
 }

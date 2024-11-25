@@ -4,15 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search-Screen</title>
-  <link rel="stylesheet" href="../../static/styles/every.css">
-  <link rel="stylesheet" href="../../static/styles/search-screen.css">
+  <link rel="stylesheet" th:href="@{/styles/every.css}">
+  <link rel="stylesheet" th:href="@{/styles/search-screen.css}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
 <header>
   <a href="https://open.spotify.com/intl-pt" target="_blank">
-    <img src="../../static/images/logo-spotify.png" alt="Logo" height="50px" >
+    <img th:src="@{/images/logo-spotify.png}" alt="Logo" height="50px" >
   </a>
+    <div class="btn-control">
+        <form th:action="@{/api/v1/artists/favorites}" method="get" style="display: inline">
+            <button type="submit" class="btn-artistas">Meus Artistas</button>
+        </form>
+        <form th:action="@{/api/v1/artists/all}" method="get" style="display: inline">
+            <button type="submit" class="btn-artistas">Todos os Artistas</button>
+        </form>
+        <form th:action="@{/api/v1/users/logout}" method="post" style="display: inline">
+            <button type="submit" class="btn-logout"><i class="fa-solid fa-right-from-bracket fa-2xl" style="color: #000000;"></i></button>
+        </form>
+    </div>
+
 </header>
 <div class="container">
   <div class="text">

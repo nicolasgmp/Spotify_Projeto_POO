@@ -62,6 +62,7 @@
 
 input:focus{
     outline: none;
+    border: 1px solid #1db954;
 }
 
 .input-group button{
@@ -77,7 +78,7 @@ input:focus{
     transition: 0.5s;
 }
 
-button:hover{
+.input-group button:hover{
     background-color: #1ed760;
     color: #fff;
     transition: 0.5s;
@@ -85,4 +86,8 @@ button:hover{
 
 .cadastro{
     color:#000;
+    background: transparent;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
 }
