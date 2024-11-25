@@ -1,29 +1,28 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" th:href="@{/styles/every.css}">
-  <link rel="stylesheet" th:href="@{/styles/login.css}">
-  <title>Login</title>
-</head>
-<body>
-<div class="container">
-  <div class="img-container">
-    <img th:src="@{/images/background-login-image.png}" alt="">
-  </div>
-  <div class="container-form">
-    <img th:src="@{/images/spotify-logo-preto.png}" alt="Logo">
-    <form class="input-group" th:action="@{/api/v1/users/login}" method="post">
-      <input type="text" name="username" id="username" placeholder="Usuário" required>
-      <input type="password" id="password" name="password" placeholder="Senha" required>
-      <button type="submit">Logar</button>
-    </form>
-    <form th:action="@{/api/v1/users/register}" method="get">
-      <button href="#" class="cadastro">Cadastre-se</button>
-    </form>
-  </div>
-</div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" th:href="@{/styles/every.css}" />
+    <link rel="stylesheet" th:href="@{/styles/login.css}" />
+    <title>Login</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="img-container">
+        <img th:src="@{/images/background-login-image.png}" alt="" />
+      </div>
+      <div class="container-form">
+        <img th:src="@{/images/spotify-logo-preto.png}" alt="Logo" />
+        <form class="input-group" th:action="@{/api/v1/users/login}" method="post">
+          <input type="text" name="username" id="username" placeholder="Usuário" required />
+          <input type="password" id="password" name="password" placeholder="Senha" required />
+          <button type="submit">Logar</button>
+        </form>
+        <form th:action="@{/api/v1/users/register}" method="get">
+          <button href="#" class="cadastro">Cadastre-se</button>
+        </form>
+      </div>
+    </div>
+  </body>
 </html>

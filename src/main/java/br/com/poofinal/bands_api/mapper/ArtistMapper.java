@@ -12,7 +12,7 @@ import br.com.poofinal.bands_api.models.Artist;
 public class ArtistMapper {
 
     public static ArtistDTO fromArtistToDTO(Artist a) {
-        return new ArtistDTO(a.getName(), a.getFollowers(), a.getGenres(), a.getUrlImg(), a.getUrlImg(), a.getAlbums());
+        return new ArtistDTO(a.getName(), a.getFollowers(), a.getGenres(), a.getUrlImg(), a.getUrlSpotify(), a.getAlbums());
     }
 
     public static ArtistDTO fromSpotifyToDTO(ArtistSpotify a, List<AlbumSpotify> as) {

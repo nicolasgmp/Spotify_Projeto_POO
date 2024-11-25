@@ -34,6 +34,8 @@ public class Album implements Serializable {
 
     private String spotifyUrl;
 
+    private Integer popularity;
+
     @ManyToOne
     @JoinColumn(name = "artist_id")
     private Artist artist;

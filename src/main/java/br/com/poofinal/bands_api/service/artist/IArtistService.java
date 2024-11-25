@@ -7,13 +7,14 @@ import org.springframework.security.core.Authentication;
 import br.com.poofinal.bands_api.client.artist.dto.AlbumDTO;
 import br.com.poofinal.bands_api.client.artist.dto.AlbumSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistDTO;
-import br.com.poofinal.bands_api.models.Album;
 
 public interface IArtistService {
-    ArtistDTO createArtist(String id, Authentication auth);
-    AlbumDTO saveArtistAlbum(String id, AlbumSpotify album, Authentication auth);
-    ArtistDTO addNewAlbum(String id, Album album);
+    ArtistDTO createArtist(String artistName, Authentication auth);
+
+    AlbumDTO saveArtistAlbum(String artistName, AlbumSpotify album, Authentication auth);
+
     List<ArtistDTO> findAllArtists(Authentication auth);
+
     List<ArtistDTO> findUserArtists(Authentication auth);
-    ArtistDTO findArtistByName(String name);
+
 }

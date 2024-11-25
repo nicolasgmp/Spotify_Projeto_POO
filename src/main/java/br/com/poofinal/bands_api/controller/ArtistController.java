@@ -48,16 +48,4 @@ public class ArtistController {
         artistService.createArtist(name, auth);
         return "redirect:/api/v1/artists/favorites";
     }
-
-    @GetMapping("/name")
-    public String getArtistByNameForm() {
-        return "view/artist-get-name-form";
-    }
-
-    @PostMapping("/name")
-    public String getArtistByName(@RequestParam String name, Model model) {
-        var artist = artistService.findArtistByName(name);
-        model.addAttribute("artists", List.of(artist));
-        return "view/artists";
-    }
 }

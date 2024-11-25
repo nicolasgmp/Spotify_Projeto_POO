@@ -1,67 +1,76 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="https://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet"  th:href="@{/styles/every.css}">
-    <link rel="stylesheet" th:href="@{/styles/card.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" th:href="@{/styles/every.css}" />
+    <link rel="stylesheet" th:href="@{/styles/card.css}" />
     <link
-            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-            crossorigin="anonymous"
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
     />
+    <link integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
     <title>Lista de Artistas</title>
-
-</head>
-<body>
-<header>
-    <a href="https://open.spotify.com/intl-pt" target="_blank">
-        <img th:src="@{/images/logo-spotify.png}" alt="Logo" height="50px" >
-    </a>
-    <div class="btn-control">
+  </head>
+  <body>
+    <header>
+      <a th:href="@{/api/v1/artists/new}">
+        <img th:src="@{/images/logo-spotify.png}" alt="Logo" height="50px" />
+      </a>
+      <div class="btn-control">
         <form th:action="@{/api/v1/artists/new}" method="get">
-            <button type="submit" class="btn-artistas" style="display: inline" >Novo Artista </button>
+          <button type="submit" class="btn-artistas" style="display: inline">Novo Artista</button>
         </form>
         <form th:action="@{/api/v1/users/logout}" method="post">
-            <button type="submit" class="btn-logout"><i class="fa-solid fa-right-from-bracket fa-2xl" style="color: #000000;"></i></button>
+          <button type="submit" class="btn-logout">
+            <i class="fa-solid fa-right-from-bracket fa-2xl" style="color: #000000"></i>
+          </button>
         </form>
-    </div>
-</header>
-<div  th:each="artist : ${artists}" class="container">
-    <div class="image">
+      </div>
+    </header>
+    <div th:each="artist : ${artists}" class="container">
+      <div class="image">
         <img th:src="${artist.imgUrl}" alt="Imagem do artista ${artist.name}" class="artist-image" />
-    </div>
-    <div class="info-artista-container">
+      </div>
+      <div class="info-artista-container">
         <div class="info-artista">
-            <h2>Link spotify <i class="bi bi-link-45deg"></i></h2>
-            <div class="link">
-                <a th:href="${artist.artistUrl}" th:text="${artist.name}" class="spotify-link" target="_blank"></a>
-            </div>
-            <h2>Seguidores <i class="bi bi-people-fill"></i> </h2>
-            <div class="seguidores">
-                <p th:text="${artist.followers}"></p>
-            </div>
-            <h2>Generos <i class="bi bi-music-note-beamed"></i></h2>
-            <div class="generos">
-                <ul>
-                    <li th:each="genre : ${artist.genres} " th:text="${genre.toUpperCase()}"></li>
-                </ul>
-            </div>
-            <h2>Albuns <i class="bi bi-disc"></i></h2>
-            <div class="albuns">
-                <ul>
-                    <li th:each="album, iterStat : ${artist.albums}">
-                        <a class="link-album"
-                                th:if="${iterStat.index < 5}"
-                                th:href="${album.spotifyUrl}"
-                                th:text="${album.name.toUpperCase()}"
-                        ></a>
-                    </li>
-                </ul>
-            </div>
+          <h2>Nome <i class="bi bi-link-45deg"></i></h2>
+          <div class="link">
+            <a th:href="${artist.artistUrl}" th:text="${artist.name}" class="spotify-link" target="_blank"></a>
+          </div>
+          <h2>Seguidores <i class="bi bi-people-fill"></i></h2>
+          <div class="seguidores">
+            <p th:text="${artist.followers}"></p>
+          </div>
+          <h2>Gêneros <i class="bi bi-music-note-beamed"></i></h2>
+          <div class="generos">
+            <ul>
+              <li th:each="genre, iterStat : ${artist.genres}">
+                <span th:text="${genre.toUpperCase()}"></span>
+                <span th:if="${!iterStat.last}"> | </span>
+              </li>
+            </ul>
+          </div>
+          <h2>Principais Álbuns <i class="bi bi-disc"></i></h2>
+          <div class="albuns">
+            <ul>
+              <li th:each="album, iterStat : ${artist.albums}">
+                <a
+                  class="link-album"
+                  th:if="${iterStat.index < 5}"
+                  th:href="${album.spotifyUrl}"
+                  th:text="${album.name.toUpperCase()}"
+                  target="_blank"
+                ></a>
+              </li>
+            </ul>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-</body>
+  </body>
 </html>

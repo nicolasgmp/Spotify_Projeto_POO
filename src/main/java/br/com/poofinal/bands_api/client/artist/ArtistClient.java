@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import br.com.poofinal.bands_api.client.artist.dto.AlbumBatch;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistAlbumSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.SearchArtistName;
@@ -30,4 +31,7 @@ public interface ArtistClient {
                         @RequestHeader("Authorization") String auth,
                         @RequestParam("query") String artistName,
                         @RequestParam("type") String type);
+
+        @GetMapping("/albums")
+        AlbumBatch getAlbumsByIds(@RequestHeader("Authorization") String auth, @RequestParam String ids);
 }

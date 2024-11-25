@@ -1,24 +1,17 @@
 package br.com.poofinal.bands_api.service.artist;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.poofinal.bands_api.client.artist.ArtistClient;
 import br.com.poofinal.bands_api.client.artist.dto.AlbumDTO;
 import br.com.poofinal.bands_api.client.artist.dto.AlbumSpotify;
-import br.com.poofinal.bands_api.client.artist.dto.ArtistAlbumSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistDTO;
 import br.com.poofinal.bands_api.client.artist.dto.ArtistSpotify;
 import br.com.poofinal.bands_api.client.artist.dto.SearchArtistName;
@@ -29,6 +22,7 @@ import br.com.poofinal.bands_api.mapper.AlbumMapper;
 import br.com.poofinal.bands_api.mapper.ArtistMapper;
 import br.com.poofinal.bands_api.models.Album;
 import br.com.poofinal.bands_api.models.Artist;
+import br.com.poofinal.bands_api.models.User;
 import br.com.poofinal.bands_api.models.enums.UserRole;
 import br.com.poofinal.bands_api.repository.AlbumRepository;
 import br.com.poofinal.bands_api.repository.ArtistRepository;
@@ -53,145 +47,152 @@ public class ArtistService implements IArtistService {
     @Autowired
     private UserRepository userRepository;
 
-    @Caching(evict = {
-            @CacheEvict(value = "artists", allEntries = true),
-            @CacheEvict(value = "user_artists", key = "#auth.name")
-    })
     @Transactional
-
     public ArtistDTO createArtist(String artistName, Authentication auth) {
-        var user = userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+        long start = System.currentTimeMillis();
+        var user = findAuthenticatedUser(auth);
+
         String token = loginService.loginSpotify();
+        ArtistSpotify artistSpotify = findArtistFromSpotify(artistName, token);
+        var existingArtist = artistRepository.findArtistByNameIgnoreCase(artistSpotify.name());
+
+        if (existingArtist.isPresent()) {
+            addArtistToUserFavorites(user, existingArtist.get());
+            return ArtistMapper.fromArtistToDTO(existingArtist.get());
+        }
+
+        Artist newArtist = saveNewArtist(artistSpotify);
+        saveArtistAlbums(newArtist, token);
+
+        addArtistToUserFavorites(user, newArtist);
+        long end = System.currentTimeMillis();
+        System.out.println("Tempo de execução: " + (end - start) + "ms");
+
+        return ArtistMapper.fromArtistToDTO(newArtist);
+    }
+
+    @Transactional
+    public AlbumDTO saveArtistAlbum(String artistName, AlbumSpotify albumSpotify, Authentication auth) {
+        Artist artist = this.findArtistByName(artistName);
+
+        Album album = createOrUpdateAlbum(artist, albumSpotify);
+        addAlbumToArtist(artist, album);
+
+        return AlbumMapper.fromAlbumToDTO(album);
+    }
+
+    public List<ArtistDTO> findAllArtists(Authentication auth) {
+        validateAdminAccess(auth);
+
+        return artistRepository.findAll().stream()
+                .peek(artist -> artist.setAlbums(fetchAlbumsSortedByPopularity(artist)))
+                .map(ArtistMapper::fromArtistToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<ArtistDTO> findUserArtists(Authentication auth) {
+        var user = findAuthenticatedUser(auth);
+
+        if (user.getArtists().isEmpty()) {
+            throw new ArtistNotFoundException("Você ainda não favoritou artistas");
+        }
+
+        return user.getArtists().stream()
+                .peek(artist -> artist.setAlbums(fetchAlbumsSortedByPopularity(artist)))
+                .map(ArtistMapper::fromArtistToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private void saveArtistAlbums(Artist artist, String token) {
+        List<String> albumIds = findAlbumIdsForArtist(artist.getId(), token);
+        List<AlbumSpotify> albumDetails = getAlbumDetailsWithPopularity(albumIds, token);
+
+        albumDetails.forEach(albumSpotify -> {
+            Album album = createOrUpdateAlbum(artist, albumSpotify);
+            addAlbumToArtist(artist, album);
+        });
+    }
+
+    private Artist findArtistByName(String name) {
+        return artistRepository.findArtistByNameIgnoreCase(name)
+                .orElseThrow(() -> new ArtistNotFoundException("Artista não encontrado: " + name));
+    }
+
+    private Artist saveNewArtist(ArtistSpotify artistSpotify) {
+        Artist artist = ArtistMapper.fromSpotifyToArtist(artistSpotify);
+        return artistRepository.save(artist);
+    }
+
+    private void addArtistToUserFavorites(User user, Artist artist) {
+        user.getArtists().add(artist);
+        userRepository.save(user);
+    }
+
+    private Album createOrUpdateAlbum(Artist artist, AlbumSpotify albumSpotify) {
+        String normalizedName = normalizeAlbumName(albumSpotify.name());
+        return albumRepository.findByNameAndArtist(normalizedName, artist)
+                .orElseGet(() -> {
+                    Album album = AlbumMapper.fromSpotifyToAlbum(albumSpotify, artist);
+                    album.setName(normalizedName);
+                    albumRepository.save(album);
+                    return album;
+                });
+    }
+
+    private void addAlbumToArtist(Artist artist, Album album) {
+        artist.getAlbums().add(album);
+        artistRepository.save(artist);
+    }
+
+    private List<AlbumSpotify> getAlbumDetailsWithPopularity(List<String> albumIds, String token) {
+        List<AlbumSpotify> albums = new ArrayList<>();
+        int size = 20;
+
+        for (int i = 0; i < albumIds.size(); i += size) {
+            List<String> batch = albumIds.subList(i, Math.min(i + size, albumIds.size()));
+            String ids = String.join(",", batch);
+
+            albums.addAll(artistClient.getAlbumsByIds("Bearer " + token, ids).albums());
+        }
+
+        return albums;
+    }
+
+    private List<String> findAlbumIdsForArtist(String spotifyId, String token) {
+        return artistClient.getArtistAlbum("Bearer " + token, 50, 0, spotifyId)
+                .items().stream()
+                .map(AlbumSpotify::id)
+                .collect(Collectors.toList());
+    }
+
+    private ArtistSpotify findArtistFromSpotify(String artistName, String token) {
         SearchArtistName res = artistClient.getArtistByName("Bearer " + token, "artist:" + artistName, "artist");
 
         if (res.artists().items().isEmpty()) {
             throw new ArtistNotFoundException("Artista não encontrado");
         }
 
-        ArtistSpotify artistSpotify = res.artists().items().get(0);
-
-        ArtistAlbumSpotify albumsSpotify = artistClient.getArtistAlbum("Bearer " + token, 50, 0, artistSpotify.id());
-
-        var artistDB = artistRepository.findArtistByNameIgnoreCase(artistSpotify.name());
-
-        if (artistDB.isPresent()) {
-            user.getArtists().add(artistDB.get());
-            userRepository.save(user);
-            return ArtistMapper.fromArtistToDTO(artistDB.get());
-        }
-
-        Artist newArtist = ArtistMapper.fromSpotifyToArtist(artistSpotify);
-        artistRepository.save(newArtist);
-
-        for (AlbumSpotify albumSpotify : albumsSpotify.items()) {
-            this.saveArtistAlbum(newArtist.getName(), albumSpotify, auth);
-        }
-
-        user.getArtists().add(newArtist);
-        userRepository.save(user);
-
-        return ArtistMapper.fromArtistToDTO(newArtist);
+        return res.artists().items().get(0);
     }
 
-    @Transactional
-    public AlbumDTO saveArtistAlbum(String name, AlbumSpotify album, Authentication auth) {
-        Artist artist = artistRepository.findArtistByNameIgnoreCase(name)
-                .orElseThrow(() -> new ArtistNotFoundException("Não foi encontrado um artista com este nome"));
-        Album newAlbum = AlbumMapper.fromSpotifyToAlbum(album, artist);
-        albumRepository.save(newAlbum);
-        this.addNewAlbum(name, newAlbum);
-
-        return AlbumMapper.fromAlbumToDTO(newAlbum);
+    private List<Album> fetchAlbumsSortedByPopularity(Artist artist) {
+        return albumRepository.findByArtistOrderByPopularityDesc(artist);
     }
 
-    @Transactional
-    public ArtistDTO addNewAlbum(String name, Album album) {
-        Artist artist = artistRepository.findArtistByNameIgnoreCase(name)
-                .orElseThrow(() -> new ArtistNotFoundException("Não foi encontrado um artista com este nome"));
-        artist.getAlbums().add(album);
-        artistRepository.save(artist);
+    private void validateAdminAccess(Authentication auth) {
+        var user = findAuthenticatedUser(auth);
 
-        artist.getAlbums().sort(Comparator.comparing(Album::getReleaseDate));
-
-        return ArtistMapper.fromArtistToDTO(artist);
-    }
-
-    @Cacheable("artists")
-    public List<ArtistDTO> findAllArtists(Authentication auth) {
-        var user = userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
         if (user.getRole() != UserRole.ADMIN) {
             throw new AccessDeniedException("Acesso negado");
         }
-
-        List<Artist> artists = artistRepository.findAll();
-        if (artists.isEmpty()) {
-            throw new ArtistNotFoundException("Não existem artistas cadastrados no DB");
-        }
-
-        var artistsDTO = artists.stream()
-                .map(a -> {
-                    this.sortAlbumsByReleaseDate(a);
-                    return ArtistMapper.fromArtistToDTO(a);
-                })
-                .collect(Collectors.toList());
-        return artistsDTO;
     }
 
-    @Cacheable("user_artists")
-    public List<ArtistDTO> findUserArtists(Authentication auth) {
-        var user = userRepository.findByUsername(auth.getName())
+    private User findAuthenticatedUser(Authentication auth) {
+        return userRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
-
-        if (user.getArtists().isEmpty()) {
-            throw new ArtistNotFoundException("Você ainda não favoritou artistas");
-        }
-
-        var artistsDTO = user.getArtists().stream()
-                .map(a -> {
-                    this.sortAlbumsByReleaseDate(a);
-                    return ArtistMapper.fromArtistToDTO(a);
-                })
-                .collect(Collectors.toList());
-        return artistsDTO;
     }
 
-    public ArtistDTO findArtistByName(String name) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
-
-        var artistDB = artistRepository.findArtistByNameIgnoreCase(name);
-        if (artistDB.isPresent()) {
-            return ArtistMapper.fromArtistToDTO(artistDB.get());
-        }
-
-        String token = loginService.loginSpotify();
-        SearchArtistName res = artistClient.getArtistByName("Bearer " + token, name, "artist");
-        ArtistSpotify artist = res.artists().items().get(0);
-        List<AlbumSpotify> resAlbums = artistClient.getArtistAlbum("Bearer " + token, 50, 0, artist.id()).items();
-
-        return ArtistMapper.fromSpotifyToDTO(artist, resAlbums);
-    }
-
-    private List<Album> sortAlbumsByReleaseDate(Artist artist) {
-        List<Album> albums = artist.getAlbums();
-        albums.sort((a1, a2) -> {
-            LocalDate date1 = this.parseReleaseDate(a1.getReleaseDate());
-            LocalDate date2 = this.parseReleaseDate(a2.getReleaseDate());
-            return date1.compareTo(date2);
-        });
-        return albums;
-    }
-
-    private LocalDate parseReleaseDate(String releaseDateStr) {
-        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        if (releaseDateStr.length() == 4) {
-            return LocalDate.of(Integer.parseInt(releaseDateStr), 1, 1);
-        } else {
-            return LocalDate.parse(releaseDateStr, formatter2);
-        }
+    private String normalizeAlbumName(String albumName) {
+        return albumName.replaceAll("\\s*(\\(.*?\\))$", "").trim();
     }
 }

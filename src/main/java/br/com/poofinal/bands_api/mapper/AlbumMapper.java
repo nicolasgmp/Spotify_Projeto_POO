@@ -10,7 +10,7 @@ public class AlbumMapper {
     public static Album fromSpotifyToAlbum(AlbumSpotify as, Artist a) {
         String img = as.images().get(0).url();
         String link = as.externalUrls().spotify();
-        return new Album(as.id(), as.name(), as.releaseDate(), img, link, a);
+        return new Album(as.id(), as.name(), as.releaseDate(), img, link, as.popularity(), a);
     }
 
     public static AlbumDTO fromAlbumToDTO(Album a) {
