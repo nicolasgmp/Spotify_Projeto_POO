@@ -17,11 +17,14 @@ import br.com.poofinal.bands_api.models.User;
 import br.com.poofinal.bands_api.models.enums.UserRole;
 import br.com.poofinal.bands_api.repository.UserRepository;
 import br.com.poofinal.bands_api.security.TokenService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/api/v1/users")
 public class AuthController {
+
     @Autowired
     private UserRepository repository;
 
@@ -31,11 +34,15 @@ public class AuthController {
     @Autowired
     private TokenService service;
 
+    @Operation(summary = "Retorna o formulário de login de usuário", responses = {
+            @ApiResponse(description = "Formulário de login", responseCode = "200") })
     @GetMapping("/login")
     public String getLoginForm() {
         return "view/user-login";
     }
 
+    @Operation(summary = "Realiza o login no sistema", description = "Valida as credenciais e gera um token para autenticação", responses = {
+            @ApiResponse(description = "Redireciona para a página de novos artistas", responseCode = "200") })
     @PostMapping("/login")
     public String login(@RequestParam String username, @RequestParam String password, HttpServletRequest req) {
         var user = this.repository.findByUsername(username);
@@ -50,11 +57,15 @@ public class AuthController {
         throw new UserLoginException("Usuário ou senha inválidos");
     }
 
+    @Operation(summary = "Retorna o formulário de cadastro de usuário", responses = {
+            @ApiResponse(description = "Formulário de cadastro", responseCode = "200") })
     @GetMapping("/register")
     public String getRegisterForm() {
         return "view/user-register";
     }
 
+    @Operation(summary = "Cadastra um novo usuário no sistema", description = "Cria um novo usuário com um nome, username e senha.", responses = {
+            @ApiResponse(description = "Redireciona para a página de login", responseCode = "201") })
     @PostMapping("/register")
     public String register(@RequestParam String name, @RequestParam String username,
             @RequestParam String password) {
@@ -75,7 +86,6 @@ public class AuthController {
     @PostMapping("/logout")
     public String logout(HttpServletRequest req) {
         req.getSession().invalidate();
-
         return "redirect:/api/v1/users/login";
     }
 
@@ -89,5 +99,4 @@ public class AuthController {
     public String unauthorized(Model model) {
         throw new UnauthorizedException("É necessário logar ou cadastrar");
     }
-
 }

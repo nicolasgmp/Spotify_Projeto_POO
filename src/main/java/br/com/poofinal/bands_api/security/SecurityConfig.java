@@ -33,8 +33,9 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/styles/**", "/images/**", "/js/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/h2-console/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/artists/all").hasRole("ADMIN")
