@@ -1,5 +1,8 @@
 package br.com.poofinal.bands_api.service.user;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,5 +23,11 @@ public class UserService {
         var artist = artistService.findArtistByName(artistName);
         user.get().getArtists().remove(artist);
         userRepository.save(user.get());
+    }
+
+    public boolean PasswordMatchesPattern(String password) {
+        Pattern pattern = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
+        Matcher matcher = pattern.matcher(password);
+        return matcher.find();
     }
 }

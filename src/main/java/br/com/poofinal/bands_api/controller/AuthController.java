@@ -17,6 +17,7 @@ import br.com.poofinal.bands_api.models.User;
 import br.com.poofinal.bands_api.models.enums.UserRole;
 import br.com.poofinal.bands_api.repository.UserRepository;
 import br.com.poofinal.bands_api.security.TokenService;
+import br.com.poofinal.bands_api.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +33,10 @@ public class AuthController {
     private PasswordEncoder encoder;
 
     @Autowired
-    private TokenService service;
+    private TokenService tokenService;
+
+    @Autowired
+    private UserService userService;
 
     @Operation(summary = "Retorna o formulário de login de usuário", responses = {
             @ApiResponse(description = "Formulário de login", responseCode = "200") })
@@ -49,12 +53,12 @@ public class AuthController {
         if (user.isEmpty()) {
             throw new UserLoginException("Usuário ou senha inválidos");
         }
-        if (encoder.matches(password, user.get().getPassword())) {
-            String token = this.service.generateToken(user.get());
-            req.getSession().setAttribute("token", token);
-            return "redirect:/api/v1/artists/new";
+        if (!encoder.matches(password, user.get().getPassword())) {
+            throw new UserLoginException("Usuário ou senha inválidos");
         }
-        throw new UserLoginException("Usuário ou senha inválidos");
+        String token = this.tokenService.generateToken(user.get());
+        req.getSession().setAttribute("token", token);
+        return "redirect:/api/v1/artists/new";
     }
 
     @Operation(summary = "Retorna o formulário de cadastro de usuário", responses = {
@@ -71,8 +75,13 @@ public class AuthController {
             @RequestParam String password) {
         var user = this.repository.findByUsername(username);
         if (user.isPresent()) {
-            throw new UserRegisterException("Usuário já cadastrado");
+            throw new UserRegisterException("Usuário já existe");
         }
+        if (!userService.PasswordMatchesPattern(password)) {
+            throw new UserRegisterException(
+                    "Senha no padrão errado. Exemplo: Senha1234!");
+        }
+
         var newUser = new User();
         newUser.setUsername(username);
         newUser.setName(name);
