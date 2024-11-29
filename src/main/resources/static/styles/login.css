@@ -4,7 +4,8 @@
     align-items: center;
     justify-content: center;
     flex-direction: row;
-    margin-top: 240px;
+    height: 100vh;
+    width: 100vw;
 }
 
 .img-container{
