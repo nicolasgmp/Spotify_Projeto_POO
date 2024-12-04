@@ -19,6 +19,7 @@ Aplicação MVC integrada à API do Spotify para inserção de artistas feita co
 - [Spring Data JPA](https://spring.io/projects/spring-data-jpa)
 - [Spring Doc Open API 3](https://springdoc.org)
 - [H2 Database](https://www.h2database.com/html/main.html)
+- [Thymeleaf](https://www.thymeleaf.org/)
 - [Lombok](https://projectlombok.org)
 - [VSCode](https://code.visualstudio.com/)
 
