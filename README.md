@@ -7,7 +7,6 @@ Nicolas Gustavo
 Leonardo Morari
 Carlos Henrique
 Jesua Isaque
-Jonas Soares
 ```
 
 Aplicação MVC integrada à API do Spotify para inserção de artistas feita com base [neste repositório](https://github.com/maromo71/projetofinalpoo) referente ao trabalho final da disciplina de Programação Orientada a Objetos.
